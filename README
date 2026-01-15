@@ -1,0 +1,154 @@
+# A/B Testing Analysis – Python and Power BI
+
+## Project Overview
+This project presents an end-to-end **A/B testing analysis** combining **Python analytics** and **Power BI visualization** to evaluate differences between a **Control** and a **Test** digital experience.
+
+The objective is not limited to measuring conversion uplift. The analysis also explores **time-based metrics, navigation behavior and client segmentation** to understand how users interact with the experience and whether the Test version leads to more efficient and engaging journeys.
+
+The workflow is hypothesis-driven and results in a **clean visit-level analytical model** suitable for business reporting in Power BI.
+
+---
+
+## Input Dataset
+The original dataset `df_analysis` is **event-level**, meaning each row represents a step within a user visit.
+
+Key fields include:
+- `visit_id`: Visit identifier
+- `client_id`: Client identifier
+- `date_time`: Event timestamp
+- `process_step`: Step in the digital process (for example start or confirm)
+- `Variation`: Experiment group (Control or Test)
+- Client attributes: `clnt_age`, `clnt_tenure_mnth`, `clnt_tenure_yr`, `gendr`, `balance`
+
+Before analysis, column formats were standardized to ensure consistent timestamp handling and categorical values.
+
+---
+
+## Data Cleaning
+
+### Cleaning 1 – Unassigned Experiment Group
+A significant number of records were not labeled as **Control** or **Test**.
+
+- These records were treated as **out-of-experiment traffic**
+- They were excluded from all A/B comparisons and Power BI visuals that contrast Control and Test
+
+This guarantees that all reported results rely only on properly assigned experimental cohorts.
+
+---
+
+### Cleaning 2 – Missing Client Attributes
+Null values were detected in client attributes required for segmentation and behavioral analysis:
+- `clnt_age`
+- `clnt_tenure_mnth`
+- `clnt_tenure_yr`
+- `gendr`
+
+Records with missing values in these fields were removed to ensure **complete and consistent segmentation data**.
+
+A total of **114 records** were dropped in this step.
+
+---
+
+### Cleaning 3 – Duplicated `confirm` Process Steps
+Several visits contained **multiple `confirm` events**, indicating duplicated tracking logs rather than multiple real conversions.
+
+- Only one valid `confirm` event per `visit_id` was retained
+- Duplicated `confirm` steps were removed
+
+This ensures that each visit has **at most one conversion event** and that conversion rate and time-to-conversion metrics are not distorted.
+
+---
+
+### Cleaning 4 – Duplicated `visit_id` Across Different `client_id`
+Some `visit_id` values were associated with **more than one `client_id`**, violating the assumption that a visit belongs to a single client.
+
+- These visits were considered **invalid**
+- Entire visits were removed from the dataset
+
+A total of **236 visits** were dropped to enforce a strict **one-to-one relationship** between visit and client.
+
+---
+
+## Hypotheses Analyzed
+
+### Hypothesis 1 – Conversion Rate
+- **Total visits**: number of unique `visit_id` per variation
+- **Converted visits**: visits reaching `process_step = 'confirm'`
+- **Conversion rate** = converted visits / total visits
+
+This hypothesis evaluates whether the **conversion rate differs between Control and Test variations**, including its evolution over time.
+
+---
+
+### Hypothesis 2 – Time to Conversion
+This hypothesis measures the **total purchase process time**, defined as the time elapsed from the user’s first entry until final conversion.
+
+- Focuses on the overall conversion experience rather than funnel efficiency
+- Outliers are identified using the **IQR method** among converted visits
+- Both raw and cleaned metrics are preserved for transparency
+
+---
+
+### Hypothesis 3 – Client Behavior Analysis
+This hypothesis focuses on **navigation behavior and journey structure**, not on speed alone.
+
+It evaluates:
+- How users move through the digital process
+- The number of steps per visit
+- Repeated steps and journey fragmentation
+
+The goal is to assess whether the **Test experience leads to more direct and less fragmented navigation paths** compared to Control.
+
+---
+
+### Hypothesis 4 – Client Segmentation Analysis
+User engagement, measured as **time spent on visit**, is analyzed across:
+- **Age groups** using custom bins
+- **Gender segments**
+
+This hypothesis evaluates whether **demographic characteristics influence browsing behavior**, identifying segments with longer and more exploratory visits.
+
+---
+
+## Power BI Data Model
+The Power BI dashboard is built primarily on top of the cleaned **`df_analysis`** dataset and is complemented by an additional **visit-level table (`Visits`)** created directly in Power BI.
+
+The `Visits` table provides:
+- One row per `visit_id`
+- Visit duration
+- Conversion flags
+- Time to conversion
+- Outlier indicators
+- Journey-level metrics
+
+This hybrid model allows flexible analysis at both **event level and visit level**.
+
+---
+
+## Power BI Visualizations
+The Power BI dashboard includes:
+- Conversion rate over time by variation
+- Average visit duration and time to conversion
+- Behavioral comparison between Control and Test
+- Segmentation views by age and gender
+
+All visuals support interactive filtering by variation conversion status outlier flags and demographic attributes.
+
+---
+
+## How to Run the Analysis
+1. Open `ABtesting.ipynb`
+2. Run all cells sequentially to reproduce the Python analysis
+3. Load `df_analysis` into Power BI
+4. Create the additional `Visits` table in Power BI for visit-level metrics
+
+---
+
+## Notes
+- Outliers are identified transparently and can be included or excluded via filters
+- Visit-level modeling prevents distortion caused by event-level duplication
+- The analysis balances **statistical rigor and business interpretability**
+
+---
+
+*Authors: Marlene Alcobendas & Iván Prieto*
