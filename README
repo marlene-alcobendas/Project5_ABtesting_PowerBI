@@ -130,7 +130,7 @@ The Power BI dashboard includes:
 - Conversion rate over time by variation
 - Average visit duration and time to conversion
 - Behavioral comparison between Control and Test
-- Segmentation views by age and gender
+- Segmentation views
 
 All visuals support interactive filtering by variation conversion status outlier flags and demographic attributes.
 
